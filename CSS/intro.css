@@ -1,0 +1,59 @@
+@font-face {
+  font-family: "yg-jalnan";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "yg-jalnan";
+}
+
+button {
+  border: none;
+}
+
+.intro-container {
+  width: 100%;
+  height: 100vh;
+  background-color: #8181f7;
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+.intro-wrapper {
+  width: 85%;
+  height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  scroll-snap-align: start;
+}
+
+.intro-ment {
+  font-size: 3rem;
+  color: white;
+}
+
+.intro-ment > span {
+  color: purple;
+}
+
+.intro-wrapper > button {
+  background-color: purple;
+  color: white;
+  padding: 20px;
+  font-size: 1.3rem;
+  border-radius: 15px;
+  cursor: pointer;
+}
+.intro-wrapper > button:hover {
+  transform: scale(1.1);
+  transition-duration: 0.2s;
+}
