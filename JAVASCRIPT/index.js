@@ -8,7 +8,9 @@ const modal = document.querySelector("dialog");
 let isLanguageKorean = true;
 let category = "popular";
 let moviedata;
+let scrollPage = 1;
 let prevCategory = "";
+let ifSearching = false;
 
 if (prevCategory === "") {
   categorySpan.innerHTML = "카테고리";
@@ -35,7 +37,7 @@ const fetchAndDisplayMovies = (url) => {
 };
 
 const displayMovies = (movies) => {
-  homeWrapper.innerHTML = "";
+  // if (ifSearching) homeWrapper.innerHTML = "";  
   movies.forEach((movie) => {
     const moviePoster = `https://image.tmdb.org/t/p/w200/${movie.poster_path}`;
     const movieList = `
@@ -45,7 +47,7 @@ const displayMovies = (movies) => {
           <span id=${movie.id}>${movie.title}</span>
         </div>
       </div>`;
-    homeWrapper.innerHTML += movieList;
+      homeWrapper.innerHTML += movieList;
   });
 
   document.querySelectorAll(".movie-box").forEach((box) => {
@@ -57,7 +59,7 @@ const displayMovies = (movies) => {
   });
 };
 
-fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1`);
+fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}&page=1`);
 
 const getModalMovie = (movieId) => {
   const modalWrapper = document.querySelector(".modal");
@@ -104,33 +106,52 @@ modal.addEventListener("click", (e) => {
   document.body.style.overflow = "auto";
 });
 
+let debounceTimeout;
+
 inputValue.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase().replace(/\s+/g, "");
-  const searchTitle = moviedata.filter((movie) => movie.title.toLowerCase().replace(/\s+/g, "").includes(searchTerm));
-  displayMovies(searchTitle);
+  clearTimeout(debounceTimeout);
+  
+  debounceTimeout = setTimeout(() => {
+    homeWrapper.innerHTML = "";
+    if (e.target.value.length > 0) {
+      ifSearching = true;
+      fetchAndDisplayMovies(`https://api.themoviedb.org/3/search/movie?query=${e.target.value}&include_adult=true&language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}&page=1`);
+    } else {
+      ifSearching = false;
+      fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`);
+    }
+  }, 300);
 });
 
+
 categoryList.addEventListener("click", (e) => {
+  scrollPage = 1;
   category = e.target.id;
-  fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${e.target.id}?language=ko-KR&page=1`);
+  homeWrapper.innerHTML = "";
+  fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${e.target.id}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}page=1`);
   categorySpan.innerText = document.getElementById(category).innerText;
 });
 
 languageToggle.addEventListener("click", () => {
   isLanguageKorean = !isLanguageKorean;
-  isLanguageKorean === true
-    ? fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=ko-KR&page=1`)
-    : fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=en-UN&page=1`);
+  console.log(isLanguageKorean);
+  homeWrapper.innerHTML = "";
+  fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`)
 });
+
+const footerSpan = document.querySelector("footer span");
 
 document.addEventListener("scroll", () => {
   const scrollTop = window.scrollY; // 현재 스크롤 위치
   const viewportHeight = window.innerHeight; // 뷰포트 높이
   const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
 
-  if (scrollTop + viewportHeight >= docHeight) {
-    isLanguageKorean === true
-      ? fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=ko-KR&page=1`)
-      : fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=en-UN&page=1`);
+  if (scrollTop + viewportHeight >= docHeight && ifSearching === false) {
+    const footerSpan = document.querySelector("footer span");
+    footerSpan.style.visibility = "visible";
+    scrollPage++;
+    fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}=&page=${scrollPage}`)
+  } else {
+    footerSpan.style.visibility = "hidden";
   }
 });
