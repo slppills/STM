@@ -5,6 +5,7 @@ const categorySpan = document.getElementById("category-span");
 const languageToggle = document.getElementById("chk1");
 const categoryList = document.getElementById("category-list");
 const modal = document.querySelector("dialog");
+const footerSpan = document.querySelector("footer span");
 let isLanguageKorean = true;
 let category = "popular";
 let moviedata;
@@ -32,12 +33,12 @@ const fetchAndDisplayMovies = (url) => {
       moviedata = [...response.results];
       console.log(moviedata);
       displayMovies(moviedata);
+      footerSpan.style.visibility = "hidden";
     })
     .catch((err) => console.error(err));
 };
 
 const displayMovies = (movies) => {
-  // if (ifSearching) homeWrapper.innerHTML = "";  
   movies.forEach((movie) => {
     const moviePoster = `https://image.tmdb.org/t/p/w200/${movie.poster_path}`;
     const movieList = `
@@ -47,9 +48,10 @@ const displayMovies = (movies) => {
           <span id=${movie.id}>${movie.title}</span>
         </div>
       </div>`;
-      homeWrapper.innerHTML += movieList;
+    homeWrapper.innerHTML += movieList;
   });
 
+  // 영화 포스터 클릭하면 모달창 띄우는 이벤트
   document.querySelectorAll(".movie-box").forEach((box) => {
     box.addEventListener("click", (e) => {
       getModalMovie(e.target.id);
@@ -59,8 +61,12 @@ const displayMovies = (movies) => {
   });
 };
 
-fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}&page=1`);
+// 처음 화면에 불러오는 데이터
+fetchAndDisplayMovies(
+  `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}&page=1`
+);
 
+// 포스터 클릭하면 모달창에 영화 정보 불러옴
 const getModalMovie = (movieId) => {
   const modalWrapper = document.querySelector(".modal");
   const modalLoading = `
@@ -101,57 +107,71 @@ const getModalMovie = (movieId) => {
     .catch((err) => console.error(err));
 };
 
+// 모달창 바깥쪽 클릭하면 모달창 닫기
 modal.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) modal.close();
   document.body.style.overflow = "auto";
 });
 
+// 검색 구현
 let debounceTimeout;
 
 inputValue.addEventListener("input", (e) => {
   clearTimeout(debounceTimeout);
-  
+
   debounceTimeout = setTimeout(() => {
     homeWrapper.innerHTML = "";
     if (e.target.value.length > 0) {
       ifSearching = true;
-      fetchAndDisplayMovies(`https://api.themoviedb.org/3/search/movie?query=${e.target.value}&include_adult=true&language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}&page=1`);
+      fetchAndDisplayMovies(
+        `https://api.themoviedb.org/3/search/movie?query=${e.target.value}&include_adult=true&language=${
+          isLanguageKorean === true ? "ko-KR" : "en-UN"
+        }&page=1`
+      );
     } else {
       ifSearching = false;
-      fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`);
+      fetchAndDisplayMovies(
+        `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`
+      );
     }
   }, 300);
 });
 
-
+// 카테고리 영화 리스트
 categoryList.addEventListener("click", (e) => {
   scrollPage = 1;
   category = e.target.id;
   homeWrapper.innerHTML = "";
-  fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${e.target.id}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}page=1`);
+  footerSpan.style.visibility = "visible";
+  fetchAndDisplayMovies(
+    `https://api.themoviedb.org/3/movie/${e.target.id}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}page=1`
+  );
   categorySpan.innerText = document.getElementById(category).innerText;
 });
 
+// 언어 변경(한국어 or 영어)
 languageToggle.addEventListener("click", () => {
   isLanguageKorean = !isLanguageKorean;
-  console.log(isLanguageKorean);
   homeWrapper.innerHTML = "";
-  fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`)
+  footerSpan.style.visibility = "visible";
+  fetchAndDisplayMovies(
+    `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`
+  );
 });
 
-const footerSpan = document.querySelector("footer span");
-
+// 페이지 무한스크롤
 document.addEventListener("scroll", () => {
   const scrollTop = window.scrollY; // 현재 스크롤 위치
   const viewportHeight = window.innerHeight; // 뷰포트 높이
   const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
 
   if (scrollTop + viewportHeight >= docHeight && ifSearching === false) {
-    const footerSpan = document.querySelector("footer span");
     footerSpan.style.visibility = "visible";
     scrollPage++;
-    fetchAndDisplayMovies(`https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}=&page=${scrollPage}`)
-  } else {
-    footerSpan.style.visibility = "hidden";
+    fetchAndDisplayMovies(
+      `https://api.themoviedb.org/3/movie/${category}?language=${
+        isLanguageKorean === true ? "ko-KR" : "en-UN"
+      }=&page=${scrollPage}`
+    );
   }
 });
