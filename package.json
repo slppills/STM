@@ -3,7 +3,7 @@
   "dependencies": {
     "gh-pages": "^6.1.1"
   },
-  "script": {
+  "scripts": {
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build"
   }
