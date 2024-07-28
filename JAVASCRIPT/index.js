@@ -54,6 +54,7 @@ const displayMovies = (movies) => {
   // 영화 포스터 클릭하면 모달창 띄우는 이벤트
   document.querySelectorAll(".movie-box").forEach((box) => {
     box.addEventListener("click", (e) => {
+      alert("영화 아이디 : " + e.target.id);
       getModalMovie(e.target.id);
       modal.showModal();
       document.body.style.overflow = "hidden";
