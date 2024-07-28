@@ -121,6 +121,7 @@ inputValue.addEventListener("input", (e) => {
 
   debounceTimeout = setTimeout(() => {
     homeWrapper.innerHTML = "";
+    footerSpan.style.visibility = "visible";
     if (e.target.value.length > 0) {
       ifSearching = true;
       fetchAndDisplayMovies(
