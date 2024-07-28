@@ -1,0 +1,10 @@
+{
+  "homepage": "https://slppills.github.io/STM",
+  "dependencies": {
+    "gh-pages": "^6.1.1"
+  },
+  "script": {
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build"
+  }
+}
