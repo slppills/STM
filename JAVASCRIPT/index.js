@@ -66,9 +66,11 @@ const displayMovies = (movies) => {
 };
 
 // 처음 화면에 불러오는 데이터
-fetchAndDisplayMovies(
-  `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
-);
+window.addEventListener("DOMContentLoaded", () => {
+  fetchAndDisplayMovies(
+    `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
+  );
+});
 
 // 모달창 바깥쪽 클릭하면 모달창 닫기
 modal.addEventListener("click", (e) => {
@@ -130,12 +132,11 @@ languageToggle.addEventListener("click", () => {
           isLanguageKorean ? "ko-KR" : "en-UN"
         }&page=${scrollPage}`
       )
-    : console.log(scrollPage);
-  fetchAndDisplayMovies(
-    `https://api.themoviedb.org/3/search/movie?query=${prevSearchTitle}&include_adult=true&language=${
-      isLanguageKorean ? "ko-KR" : "en-UN"
-    }&page=${scrollPage}`
-  );
+    : fetchAndDisplayMovies(
+        `https://api.themoviedb.org/3/search/movie?query=${prevSearchTitle}&include_adult=true&language=${
+          isLanguageKorean ? "ko-KR" : "en-UN"
+        }&page=${scrollPage}`
+      );
 });
 
 // 페이지 무한스크롤
@@ -144,7 +145,7 @@ const handleScroll = () => {
   const viewportHeight = window.innerHeight; // 뷰포트 높이
   const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
 
-  if (scrollTop + viewportHeight >= docHeight && scrollTop > 0) {
+  if (scrollTop + viewportHeight >= docHeight && moviedata.length > 0) {
     console.log("handleScroll의 if문");
     footerSpan.style.visibility = "visible";
     scrollPage++;
