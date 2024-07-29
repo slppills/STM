@@ -145,7 +145,7 @@ const handleScroll = () => {
   const viewportHeight = window.innerHeight; // 뷰포트 높이
   const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
 
-  if (scrollTop + viewportHeight >= docHeight && moviedata.length > 0) {
+  if (scrollTop + viewportHeight >= docHeight && scrollTop > 0 && moviedata.length === 20) {
     footerSpan.style.visibility = "visible";
     scrollPage++;
 
