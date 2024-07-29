@@ -146,7 +146,6 @@ const handleScroll = () => {
   const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
 
   if (scrollTop + viewportHeight >= docHeight && moviedata.length > 0) {
-    console.log("handleScroll의 if문");
     footerSpan.style.visibility = "visible";
     scrollPage++;
 
