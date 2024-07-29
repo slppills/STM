@@ -64,7 +64,7 @@ const displayMovies = (movies) => {
 
 // 처음 화면에 불러오는 데이터
 fetchAndDisplayMovies(
-  `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}&page=1`
+  `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
 );
 
 // 포스터 클릭하면 모달창에 영화 정보 불러옴
@@ -74,10 +74,7 @@ const getModalMovie = (movieId) => {
     <div class="modal-loading"><span>Loading...</span></div>
   `;
   modalWrapper.innerHTML = modalLoading;
-  fetch(
-    `https://api.themoviedb.org/3/movie/${movieId}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`,
-    options
-  )
+  fetch(`https://api.themoviedb.org/3/movie/${movieId}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}`, options)
     .then((response) => response.json())
     .then((response) => {
       const modalMoviedata = response;
@@ -116,8 +113,10 @@ modal.addEventListener("click", (e) => {
 
 // 검색 구현
 let debounceTimeout;
+let prevSearchTitle = "";
 
 inputValue.addEventListener("input", (e) => {
+  prevSearchTitle = e.target.value;
   clearTimeout(debounceTimeout);
 
   debounceTimeout = setTimeout(() => {
@@ -127,13 +126,13 @@ inputValue.addEventListener("input", (e) => {
       ifSearching = true;
       fetchAndDisplayMovies(
         `https://api.themoviedb.org/3/search/movie?query=${e.target.value}&include_adult=true&language=${
-          isLanguageKorean === true ? "ko-KR" : "en-UN"
+          isLanguageKorean ? "ko-KR" : "en-UN"
         }&page=1`
       );
     } else {
       ifSearching = false;
       fetchAndDisplayMovies(
-        `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`
+        `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}`
       );
     }
   }, 300);
@@ -146,7 +145,7 @@ categoryList.addEventListener("click", (e) => {
   homeWrapper.innerHTML = "";
   footerSpan.style.visibility = "visible";
   fetchAndDisplayMovies(
-    `https://api.themoviedb.org/3/movie/${e.target.id}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}page=1`
+    `https://api.themoviedb.org/3/movie/${e.target.id}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
   );
   categorySpan.innerText = document.getElementById(category).innerText;
 });
@@ -154,11 +153,18 @@ categoryList.addEventListener("click", (e) => {
 // 언어 변경(한국어 or 영어)
 languageToggle.addEventListener("click", () => {
   isLanguageKorean = !isLanguageKorean;
+  console.log(isLanguageKorean);
   homeWrapper.innerHTML = "";
   footerSpan.style.visibility = "visible";
-  fetchAndDisplayMovies(
-    `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean === true ? "ko-KR" : "en-UN"}`
-  );
+  ifSearching === false
+    ? fetchAndDisplayMovies(
+        `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}`
+      )
+    : fetchAndDisplayMovies(
+        `https://api.themoviedb.org/3/search/movie?query=${prevSearchTitle}&include_adult=true&language=${
+          isLanguageKorean ? "ko-KR" : "en-UN"
+        }&page=1`
+      );
 });
 
 // 페이지 무한스크롤
@@ -167,13 +173,19 @@ document.addEventListener("scroll", () => {
   const viewportHeight = window.innerHeight; // 뷰포트 높이
   const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
 
-  if (scrollTop + viewportHeight >= docHeight && ifSearching === false) {
-    footerSpan.style.visibility = "visible";
+  if (scrollTop + viewportHeight >= docHeight) {
+    if (moviedata.length === 20) footerSpan.style.visibility = "visible";
     scrollPage++;
-    fetchAndDisplayMovies(
-      `https://api.themoviedb.org/3/movie/${category}?language=${
-        isLanguageKorean === true ? "ko-KR" : "en-UN"
-      }=&page=${scrollPage}`
-    );
+    ifSearching === false
+      ? fetchAndDisplayMovies(
+          `https://api.themoviedb.org/3/movie/${category}?language=${
+            isLanguageKorean ? "ko-KR" : "en-UN"
+          }&page=${scrollPage}`
+        )
+      : fetchAndDisplayMovies(
+          `https://api.themoviedb.org/3/search/movie?query=${prevSearchTitle}&include_adult=true&language=${
+            isLanguageKorean ? "ko-KR" : "en-UN"
+          }&page=${scrollPage}`
+        );
   }
 });
