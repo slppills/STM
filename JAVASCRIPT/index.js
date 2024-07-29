@@ -1,23 +1,26 @@
+import { getModalMovie } from "./modal.js";
 const homeWrapper = document.querySelector(".home-wrapper");
 let inputValue = document.getElementById("title-input");
-const categoryItems = document.querySelectorAll(".header-navbar li");
 const categorySpan = document.getElementById("category-span");
 const languageToggle = document.getElementById("chk1");
 const categoryList = document.getElementById("category-list");
 const modal = document.querySelector("dialog");
 const footerSpan = document.querySelector("footer span");
-let isLanguageKorean = true;
+const logo = document.querySelector("header .logo");
+export let isLanguageKorean = true;
 let category = "popular";
-let moviedata;
 let scrollPage = 1;
+let moviedata;
 let prevCategory = "";
 let ifSearching = false;
+let debounceTimeout;
+let prevSearchTitle = "";
 
 if (prevCategory === "") {
   categorySpan.innerHTML = "카테고리";
 }
 
-const options = {
+export const options = {
   method: "GET",
   headers: {
     accept: "application/json",
@@ -51,7 +54,7 @@ const displayMovies = (movies) => {
     homeWrapper.innerHTML += movieList;
   });
 
-  // 영화 포스터 클릭하면 모달창 띄우는 이벤트
+  // 영화 포스터 클릭하면 모달창 띄우는 이벤트를 movie-box에 forEach로 붙임
   document.querySelectorAll(".movie-box").forEach((box) => {
     box.addEventListener("click", (e) => {
       alert("영화 아이디 : " + e.target.id);
@@ -67,54 +70,18 @@ fetchAndDisplayMovies(
   `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
 );
 
-// 포스터 클릭하면 모달창에 영화 정보 불러옴
-const getModalMovie = (movieId) => {
-  const modalWrapper = document.querySelector(".modal");
-  const modalLoading = `
-    <div class="modal-loading"><span>Loading...</span></div>
-  `;
-  modalWrapper.innerHTML = modalLoading;
-  fetch(`https://api.themoviedb.org/3/movie/${movieId}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}`, options)
-    .then((response) => response.json())
-    .then((response) => {
-      const modalMoviedata = response;
-      console.log(modalMoviedata);
-      const moviePoster = `https://image.tmdb.org/t/p/w500/${modalMoviedata.backdrop_path}`;
-
-      const MovieInfo = `
-        <div class="modal-image">
-          <img src=${moviePoster} alt=${modalMoviedata.title}>
-          <div class="modal-genres">${modalMoviedata.genres.map((genre) => `<span>#${genre.name}</span>`)}</div>
-        </div>
-        <div class="modal-info">
-          <div class="modal-info-wrapper">
-            <h1>${modalMoviedata.title}</h1>
-            <div class="modal-releasedate">
-              <span>${modalMoviedata.release_date}</span>
-              <div><span class="vote_average">${modalMoviedata.vote_average.toFixed(1)}</span>/10</div>
-            </div>
-            <span class="modal-overview">${
-              modalMoviedata.overview ? modalMoviedata.overview : "(언어를 바꿔주세요)"
-            }</span>
-          </div>
-          
-        </div>
-      `;
-      modalWrapper.innerHTML = MovieInfo;
-    })
-    .catch((err) => console.error(err));
-};
-
 // 모달창 바깥쪽 클릭하면 모달창 닫기
 modal.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) modal.close();
   document.body.style.overflow = "auto";
 });
 
-// 검색 구현
-let debounceTimeout;
-let prevSearchTitle = "";
+// STM 로고 누르면 페이지 새로고침
+logo.addEventListener("click", () => {
+  window.location.href = "index.html";
+});
 
+// 검색 구현
 inputValue.addEventListener("input", (e) => {
   prevSearchTitle = e.target.value;
   clearTimeout(debounceTimeout);
@@ -153,7 +120,6 @@ categoryList.addEventListener("click", (e) => {
 // 언어 변경(한국어 or 영어)
 languageToggle.addEventListener("click", () => {
   isLanguageKorean = !isLanguageKorean;
-  console.log(isLanguageKorean);
   homeWrapper.innerHTML = "";
   footerSpan.style.visibility = "visible";
   ifSearching === false
