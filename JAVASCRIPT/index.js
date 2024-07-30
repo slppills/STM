@@ -1,22 +1,23 @@
 import { getModalMovie } from "./modal.js";
-const homeWrapper = document.querySelector(".home-wrapper");
-let inputValue = document.getElementById("title-input");
-const categorySpan = document.getElementById("category-span");
-const languageToggle = document.getElementById("chk1");
-const categoryList = document.getElementById("category-list");
-const modal = document.querySelector("dialog");
-const footerSpan = document.querySelector("footer span");
-const logo = document.querySelector("header .logo");
-export let isLanguageKorean = true;
-let category = "popular";
-let scrollPage = 1;
-let moviedata;
-let prevCategory = "";
-let ifSearching = false;
-let debounceTimeout;
-let prevSearchTitle = "";
+import { handleScroll } from "./scroll.js";
+import { state } from "./state.js";
+import { changeLanguage } from "./language.js";
+import { changeCategory } from "./category.js";
+import { searchMovie } from "./search.js";
+export const homeWrapper = document.querySelector(".home-wrapper");
+export let inputValue = document.getElementById("title-input");
+export const categorySpan = document.getElementById("category-span");
+export const languageToggle = document.getElementById("chk1");
+export const categoryList = document.getElementById("category-list");
+export const modal = document.querySelector("dialog");
+export const footerSpan = document.querySelector("footer span");
+export const logo = document.querySelector("header .logo");
 
-if (prevCategory === "") {
+export const incrementScrollPage = () => {
+  state.scrollPage++;
+};
+
+if (state.prevCategory === "") {
   categorySpan.innerHTML = "카테고리";
 }
 
@@ -29,13 +30,13 @@ export const options = {
   },
 };
 
-const fetchAndDisplayMovies = (url) => {
+export const fetchAndDisplayMovies = (url) => {
   fetch(url, options)
     .then((response) => response.json())
     .then((response) => {
-      moviedata = [...response.results];
-      console.log(moviedata);
-      displayMovies(moviedata);
+      state.moviedata = [...response.results];
+      console.log(state.moviedata);
+      displayMovies(state.moviedata);
       footerSpan.style.visibility = "hidden";
     })
     .catch((err) => console.error(err));
@@ -68,7 +69,7 @@ const displayMovies = (movies) => {
 // 처음 화면에 불러오는 데이터
 window.addEventListener("DOMContentLoaded", () => {
   fetchAndDisplayMovies(
-    `https://api.themoviedb.org/3/movie/popular?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
+    `https://api.themoviedb.org/3/movie/popular?language=${state.isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
   );
 });
 
@@ -83,87 +84,10 @@ logo.addEventListener("click", () => {
   window.location.href = "index.html";
 });
 
-// 검색 구현
-inputValue.addEventListener("input", (e) => {
-  prevSearchTitle = e.target.value;
-  clearTimeout(debounceTimeout);
-  scrollPage = 1;
+inputValue.addEventListener("input", (e) => searchMovie(e));
 
-  debounceTimeout = setTimeout(() => {
-    homeWrapper.innerHTML = "";
-    footerSpan.style.visibility = "visible";
-    if (e.target.value.length > 0) {
-      ifSearching = true;
-      fetchAndDisplayMovies(
-        `https://api.themoviedb.org/3/search/movie?query=${e.target.value}&include_adult=true&language=${
-          isLanguageKorean ? "ko-KR" : "en-UN"
-        }&page=1`
-      );
-    } else {
-      ifSearching = false;
-      fetchAndDisplayMovies(
-        `https://api.themoviedb.org/3/movie/${category}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}`
-      );
-    }
-  }, 300);
-});
+categoryList.addEventListener("click", (e) => changeCategory(e));
 
-// 카테고리 영화 리스트
-categoryList.addEventListener("click", (e) => {
-  inputValue.value = "";
-  ifSearching = false;
-  prevSearchTitle = inputValue.value;
-  console.log(prevSearchTitle);
-  scrollPage = 1;
-  category = e.target.id;
-  homeWrapper.innerHTML = "";
-  footerSpan.style.visibility = "visible";
-  fetchAndDisplayMovies(
-    `https://api.themoviedb.org/3/movie/${e.target.id}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}&page=1`
-  );
-  categorySpan.innerText = document.getElementById(category).innerText;
-});
+languageToggle.addEventListener("click", () => changeLanguage());
 
-// 언어 변경(한국어 or 영어)
-languageToggle.addEventListener("click", () => {
-  scrollPage = 1;
-  isLanguageKorean = !isLanguageKorean;
-  homeWrapper.innerHTML = "";
-  footerSpan.style.visibility = "visible";
-  ifSearching === false
-    ? fetchAndDisplayMovies(
-        `https://api.themoviedb.org/3/movie/${category}?language=${
-          isLanguageKorean ? "ko-KR" : "en-UN"
-        }&page=${scrollPage}`
-      )
-    : fetchAndDisplayMovies(
-        `https://api.themoviedb.org/3/search/movie?query=${prevSearchTitle}&include_adult=true&language=${
-          isLanguageKorean ? "ko-KR" : "en-UN"
-        }&page=${scrollPage}`
-      );
-});
-
-// 페이지 무한스크롤
-const handleScroll = () => {
-  const scrollTop = window.scrollY; // 현재 스크롤 위치
-  const viewportHeight = window.innerHeight; // 뷰포트 높이
-  const docHeight = document.documentElement.scrollHeight; // 전체 페이지 높이
-
-  if (scrollTop + viewportHeight >= docHeight && scrollTop > 0 && moviedata.length === 20) {
-    footerSpan.style.visibility = "visible";
-    scrollPage++;
-
-    ifSearching === false
-      ? fetchAndDisplayMovies(`
-          https://api.themoviedb.org/3/movie/${category}?language=${
-          isLanguageKorean ? "ko-KR" : "en-UN"
-        }&page=${scrollPage}`)
-      : fetchAndDisplayMovies(
-          `https://api.themoviedb.org/3/search/movie?query=${prevSearchTitle}&include_adult=true&language=${
-            isLanguageKorean ? "ko-KR" : "en-UN"
-          }&page=${scrollPage}`
-        );
-  }
-};
-
-document.addEventListener("scroll", handleScroll);
+document.addEventListener("scroll", handleScroll());

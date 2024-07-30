@@ -1,5 +1,5 @@
-import { isLanguageKorean } from "./index.js";
 import { options } from "./index.js";
+import { state } from "./state.js";
 
 // 포스터 클릭하면 모달창에 영화 정보 불러옴
 export const getModalMovie = (movieId) => {
@@ -8,7 +8,7 @@ export const getModalMovie = (movieId) => {
         <div class="modal-loading"><span>Loading...</span></div>
       `;
   modalWrapper.innerHTML = modalLoading;
-  fetch(`https://api.themoviedb.org/3/movie/${movieId}?language=${isLanguageKorean ? "ko-KR" : "en-UN"}`, options)
+  fetch(`https://api.themoviedb.org/3/movie/${movieId}?language=${state.isLanguageKorean ? "ko-KR" : "en-UN"}`, options)
     .then((response) => response.json())
     .then((response) => {
       const modalMoviedata = response;
