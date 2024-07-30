@@ -110,6 +110,10 @@ inputValue.addEventListener("input", (e) => {
 
 // 카테고리 영화 리스트
 categoryList.addEventListener("click", (e) => {
+  inputValue.value = "";
+  ifSearching = false;
+  prevSearchTitle = inputValue.value;
+  console.log(prevSearchTitle);
   scrollPage = 1;
   category = e.target.id;
   homeWrapper.innerHTML = "";
