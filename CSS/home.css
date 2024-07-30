@@ -5,6 +5,10 @@
   font-style: normal;
 }
 
+:root {
+  --background-color: #2e2e2e;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -25,7 +29,7 @@ a {
 }
 
 body {
-  background-color: #2e2e2e;
+  background-color: var(--background-color);
 }
 
 header {
@@ -35,7 +39,7 @@ header {
   display: flex;
   justify-content: space-between;
   position: fixed;
-  background-color: #2e2e2e;
+  background-color: var(--background-color);
 }
 
 .header-container {
